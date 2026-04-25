@@ -1,26 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-
-interface Dispenser {
-  id: number;
-  name: string;
-  type: 'shears' | 'bottles';
-  enabled: boolean;
-  capacity: number;
-  current: number;
-  status: 'full' | 'normal' | 'low' | 'empty';
-}
+import { useGame } from '../context/GameContext';
 
 const AutomationPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [dispensers, setDispensers] = useState<Dispenser[]>([
-    { id: 1, name: 'Shears Dispenser A', type: 'shears', enabled: true, capacity: 64, current: 45, status: 'normal' },
-    { id: 2, name: 'Shears Dispenser B', type: 'shears', enabled: true, capacity: 64, current: 12, status: 'low' },
-    { id: 3, name: 'Bottle Dispenser A', type: 'bottles', enabled: true, capacity: 64, current: 58, status: 'full' },
-    { id: 4, name: 'Bottle Dispenser B', type: 'bottles', enabled: false, capacity: 64, current: 3, status: 'empty' },
-  ]);
-
+  const { state, actions } = useGame();
   const [isCollecting, setIsCollecting] = useState(false);
 
   useEffect(() => {
@@ -53,14 +37,9 @@ const AutomationPage = () => {
     return () => ctx.revert();
   }, []);
 
-  const toggleDispenser = (id: number) => {
-    setDispensers(dispensers.map(d =>
-      d.id === id ? { ...d, enabled: !d.enabled } : d
-    ));
-  };
-
   const handleForceCollect = () => {
     setIsCollecting(true);
+    actions.forceCollectAll();
     setTimeout(() => setIsCollecting(false), 3000);
   };
 
@@ -94,8 +73,8 @@ const AutomationPage = () => {
     }
   };
 
-  const activeDispensers = dispensers.filter(d => d.enabled).length;
-  const totalDispensers = dispensers.length;
+  const activeDispensers = state.dispensers.filter(d => d.enabled).length;
+  const totalDispensers = state.dispensers.length;
 
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-honey-50 to-honey-100 p-8">
@@ -146,8 +125,15 @@ const AutomationPage = () => {
                   <span className="text-2xl font-bold text-green-700">ON ✓</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-comb-900">Circuit Status:</span>
-                  <span className="text-2xl font-bold text-green-700">STABLE</span>
+                  <span className="text-sm font-bold text-comb-900">Auto-Collect:</span>
+                  <button
+                    onClick={() => actions.toggleAutoCollect()}
+                    className={`text-lg font-bold px-3 py-1 rounded ${
+                      state.autoCollectEnabled ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
+                    }`}
+                  >
+                    {state.autoCollectEnabled ? 'ON' : 'OFF'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -157,7 +143,7 @@ const AutomationPage = () => {
         {/* Dispensers Grid */}
         <h2 className="text-2xl font-minecraft text-comb-900 mb-4">🔧 DISPENSER MANAGEMENT</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {dispensers.map((dispenser) => (
+          {state.dispensers.map((dispenser) => (
             <div
               key={dispenser.id}
               className={`dispenser-card rounded-lg p-6 border-4 shadow-xl transition-all ${
@@ -186,7 +172,7 @@ const AutomationPage = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-comb-900">POWER STATUS:</span>
                   <button
-                    onClick={() => toggleDispenser(dispenser.id)}
+                    onClick={() => actions.toggleDispenser(dispenser.id)}
                     className={`relative w-16 h-8 rounded-full border-2 border-comb-900 transition-all ${
                       dispenser.enabled ? 'bg-green-600' : 'bg-gray-600'
                     }`}
@@ -206,7 +192,7 @@ const AutomationPage = () => {
               </div>
 
               {/* Capacity */}
-              <div className="bg-comb-900/20 rounded-lg p-4 border-2 border-comb-900">
+              <div className="bg-comb-900/20 rounded-lg p-4 border-2 border-comb-900 mb-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-bold text-comb-900">
                     {dispenser.type === 'shears' ? 'SHEARS' : 'BOTTLES'}
@@ -227,6 +213,14 @@ const AutomationPage = () => {
                   </span>
                 </div>
               </div>
+
+              {/* Refill Button */}
+              <button
+                onClick={() => actions.refillDispenser(dispenser.id, 32)}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded border-2 border-comb-900"
+              >
+                REFILL +32 (64 💰)
+              </button>
             </div>
           ))}
         </div>

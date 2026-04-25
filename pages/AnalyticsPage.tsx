@@ -1,37 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-
-interface DataPoint {
-  time: string;
-  honey: number;
-  bees: number;
-}
+import { useGame } from '../context/GameContext';
 
 const AnalyticsPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { state } = useGame();
 
-  // Mock data for last 24 in-game hours
-  const [data] = useState<DataPoint[]>([
-    { time: '00:00', honey: 12, bees: 45 },
-    { time: '02:00', honey: 15, bees: 52 },
-    { time: '04:00', honey: 18, bees: 68 },
-    { time: '06:00', honey: 25, bees: 120 },
-    { time: '08:00', honey: 35, bees: 180 },
-    { time: '10:00', honey: 42, bees: 210 },
-    { time: '12:00', honey: 48, bees: 247 },
-    { time: '14:00', honey: 45, bees: 235 },
-    { time: '16:00', honey: 38, bees: 195 },
-    { time: '18:00', honey: 28, bees: 145 },
-    { time: '20:00', honey: 20, bees: 85 },
-    { time: '22:00', honey: 14, bees: 58 },
-  ]);
+  // Use production history from game state, or create default data if empty
+  const data = state.productionHistory.length > 0
+    ? state.productionHistory
+    : [
+        { time: '00:00', honey: 0, bees: 0 },
+        { time: '06:00', honey: 0, bees: 0 },
+        { time: '12:00', honey: 0, bees: 0 },
+        { time: '18:00', honey: 0, bees: 0 },
+      ];
 
   const stats = {
     totalHoney: data.reduce((sum, d) => sum + d.honey, 0),
-    avgHoney: Math.round(data.reduce((sum, d) => sum + d.honey, 0) / data.length),
-    peakTime: data.reduce((max, d) => d.honey > max.honey ? d : max, data[0]).time,
-    peakBees: Math.max(...data.map(d => d.bees)),
+    avgHoney: data.length > 0 ? Math.round(data.reduce((sum, d) => sum + d.honey, 0) / data.length) : 0,
+    peakTime: data.length > 0 ? data.reduce((max, d) => d.honey > max.honey ? d : max, data[0]).time : '00:00',
+    peakBees: data.length > 0 ? Math.max(...data.map(d => d.bees)) : 0,
   };
 
   useEffect(() => {
@@ -66,7 +56,7 @@ const AnalyticsPage = () => {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || data.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -100,8 +90,8 @@ const AnalyticsPage = () => {
     }
 
     // Find max values
-    const maxHoney = Math.max(...data.map(d => d.honey));
-    const maxBees = Math.max(...data.map(d => d.bees));
+    const maxHoney = Math.max(...data.map(d => d.honey), 1);
+    const maxBees = Math.max(...data.map(d => d.bees), 1);
 
     // Draw honey production line
     ctx.strokeStyle = '#FFA000';
@@ -163,7 +153,7 @@ const AnalyticsPage = () => {
     ctx.font = 'bold 12px monospace';
     ctx.textAlign = 'center';
     data.forEach((point, i) => {
-      if (i % 2 === 0) {
+      if (i % Math.max(1, Math.floor(data.length / 6)) === 0) {
         const x = padding + (chartWidth / (data.length - 1)) * i;
         ctx.fillText(point.time, x, height - padding + 20);
       }
@@ -267,9 +257,10 @@ const AnalyticsPage = () => {
             <div className="flex items-center gap-4">
               <span className="text-5xl">✓</span>
               <div>
-                <h3 className="text-xl font-minecraft text-comb-900 mb-2">PEAK EFFICIENCY</h3>
+                <h3 className="text-xl font-minecraft text-comb-900 mb-2">CURRENT STATUS</h3>
                 <p className="text-sm text-comb-900 font-bold">
-                  Maximum production occurs between 06:00-14:00 when all bees are active. Consider scheduling collection during this window.
+                  You have {state.hives.length} hives with {state.hives.reduce((sum, h) => sum + h.bees.length, 0)} total bees.
+                  Current weather: {state.weather.toUpperCase()}. Time: {state.timeOfDay.toUpperCase()}.
                 </p>
               </div>
             </div>
@@ -281,7 +272,9 @@ const AnalyticsPage = () => {
               <div>
                 <h3 className="text-xl font-minecraft text-comb-900 mb-2">OPTIMIZATION TIP</h3>
                 <p className="text-sm text-comb-900 font-bold">
-                  Night-time production (20:00-04:00) is 60% lower. Consider adding more flowers near hives to improve daytime efficiency.
+                  {state.timeOfDay === 'night'
+                    ? 'Night-time production is slower. Consider adding more bees to compensate.'
+                    : 'Daytime is optimal for production. Make sure all hives have maximum bees!'}
                 </p>
               </div>
             </div>

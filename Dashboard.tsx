@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { useGame } from './context/GameContext';
 import HexagonCard from './components/HexagonCard';
 import BeePopulation from './components/BeePopulation';
 import HoneyReservoir from './components/HoneyReservoir';
@@ -8,6 +9,7 @@ import HiveMiniMap from './components/HiveMiniMap';
 
 const Dashboard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { state, actions } = useGame();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -45,6 +47,10 @@ const Dashboard = () => {
     return () => ctx.revert();
   }, []);
 
+  const totalBees = state.hives.reduce((sum, hive) => sum + hive.bees.length, 0);
+  const totalHoneyBottles = state.resources.honey;
+  const totalHoneycombs = state.resources.honeycomb;
+
   return (
     <div ref={containerRef} className="p-8">
         {/* Hexagon Grid - Main Stats */}
@@ -54,7 +60,7 @@ const Dashboard = () => {
             <div className="hexagon-card">
               <HexagonCard
               title="HIVES"
-              value="24"
+              value={state.hives.length.toString()}
               subtitle="Active"
               status="active"
               icon="🏠"
@@ -63,7 +69,7 @@ const Dashboard = () => {
             <div className="hexagon-card">
             <HexagonCard
               title="BEES"
-              value="247"
+              value={totalBees.toString()}
               subtitle="Total"
               status="active"
               icon="🐝"
@@ -72,7 +78,7 @@ const Dashboard = () => {
             <div className="hexagon-card">
             <HexagonCard
               title="HONEY"
-              value="1.5K"
+              value={totalHoneyBottles.toString()}
               subtitle="Bottles"
               status="full"
               icon="🍯"
@@ -81,8 +87,8 @@ const Dashboard = () => {
             <div className="hexagon-card">
             <HexagonCard
               title="COMBS"
-              value="456"
-              subtitle="Blocks"
+              value={totalHoneycombs.toString()}
+              subtitle="Items"
               status="active"
               icon="⬡"
             />
@@ -145,7 +151,10 @@ const Dashboard = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <button className="bg-honey-500 hover:bg-honey-600 text-comb-900 font-bold py-3 px-4 rounded-lg border-2 border-comb-900 transition-all transform hover:scale-105 shadow-lg">
+              <button
+                onClick={() => actions.forceCollectAll()}
+                className="bg-honey-500 hover:bg-honey-600 text-comb-900 font-bold py-3 px-4 rounded-lg border-2 border-comb-900 transition-all transform hover:scale-105 shadow-lg"
+              >
                 🍯 COLLECT ALL
               </button>
               <button className="bg-green-500 hover:bg-green-600 text-comb-900 font-bold py-3 px-4 rounded-lg border-2 border-comb-900 transition-all transform hover:scale-105 shadow-lg">

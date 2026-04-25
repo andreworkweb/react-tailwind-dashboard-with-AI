@@ -1,74 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-
-interface StorageItem {
-  id: number;
-  name: string;
-  icon: string;
-  stacks: number;
-  maxStacks: number;
-  itemsPerStack: number;
-}
-
-interface Chest {
-  id: number;
-  name: string;
-  capacity: number;
-  used: number;
-  status: 'normal' | 'warning' | 'full';
-  items: StorageItem[];
-}
+import { useGame } from '../context/GameContext';
 
 const InventoryPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [chests] = useState<Chest[]>([
-    {
-      id: 1,
-      name: 'Main Storage',
-      capacity: 27,
-      used: 18,
-      status: 'normal',
-      items: [
-        { id: 1, name: 'Honeycomb', icon: '⬡', stacks: 12, maxStacks: 64, itemsPerStack: 64 },
-        { id: 2, name: 'Honey Bottle', icon: '🍯', stacks: 8, maxStacks: 16, itemsPerStack: 16 },
-        { id: 3, name: 'Honey Block', icon: '🟧', stacks: 6, maxStacks: 64, itemsPerStack: 64 },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Overflow Chest',
-      capacity: 27,
-      used: 24,
-      status: 'warning',
-      items: [
-        { id: 1, name: 'Honeycomb', icon: '⬡', stacks: 15, maxStacks: 64, itemsPerStack: 64 },
-        { id: 2, name: 'Honey Bottle', icon: '🍯', stacks: 9, maxStacks: 16, itemsPerStack: 16 },
-      ],
-    },
-    {
-      id: 3,
-      name: 'Backup Storage',
-      capacity: 27,
-      used: 27,
-      status: 'full',
-      items: [
-        { id: 1, name: 'Honeycomb', icon: '⬡', stacks: 18, maxStacks: 64, itemsPerStack: 64 },
-        { id: 2, name: 'Honey Block', icon: '🟧', stacks: 9, maxStacks: 64, itemsPerStack: 64 },
-      ],
-    },
-  ]);
-
-  const totalResources = {
-    honeycomb: chests.reduce((sum, chest) =>
-      sum + (chest.items.find(i => i.name === 'Honeycomb')?.stacks || 0), 0),
-    honeyBottle: chests.reduce((sum, chest) =>
-      sum + (chest.items.find(i => i.name === 'Honey Bottle')?.stacks || 0), 0),
-    honeyBlock: chests.reduce((sum, chest) =>
-      sum + (chest.items.find(i => i.name === 'Honey Block')?.stacks || 0), 0),
-  };
-
-  const hopperStatus = chests.some(c => c.status === 'full') ? 'CLOGGED' : 'WORKING';
+  const { state, actions } = useGame();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -123,6 +59,8 @@ const InventoryPage = () => {
     }
   };
 
+  const hopperStatus = state.chests.some(c => c.status === 'full') ? 'CLOGGED' : 'WORKING';
+
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-honey-50 to-honey-100 p-8">
       <div className="max-w-7xl mx-auto">
@@ -150,11 +88,15 @@ const InventoryPage = () => {
             <div className="text-center">
               <div className="text-5xl mb-2">⬡</div>
               <h3 className="text-2xl font-minecraft text-comb-900 font-bold mb-2">HONEYCOMB</h3>
-              <div className="text-4xl font-bold text-comb-900">{totalResources.honeycomb}</div>
-              <div className="text-sm text-comb-800 font-bold">STACKS</div>
-              <div className="text-xs text-comb-700 mt-2">
-                ({totalResources.honeycomb * 64} items)
-              </div>
+              <div className="text-4xl font-bold text-comb-900">{state.resources.honeycomb}</div>
+              <div className="text-sm text-comb-800 font-bold">ITEMS</div>
+              <button
+                onClick={() => actions.sellResources('honeycomb', Math.min(10, state.resources.honeycomb))}
+                disabled={state.resources.honeycomb < 1}
+                className="mt-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-xs font-bold py-2 px-4 rounded border-2 border-comb-900"
+              >
+                SELL 10 (50 💰)
+              </button>
             </div>
           </div>
 
@@ -162,11 +104,15 @@ const InventoryPage = () => {
             <div className="text-center">
               <div className="text-5xl mb-2">🍯</div>
               <h3 className="text-2xl font-minecraft text-comb-900 font-bold mb-2">HONEY BOTTLE</h3>
-              <div className="text-4xl font-bold text-comb-900">{totalResources.honeyBottle}</div>
-              <div className="text-sm text-comb-800 font-bold">STACKS</div>
-              <div className="text-xs text-comb-700 mt-2">
-                ({totalResources.honeyBottle * 16} bottles)
-              </div>
+              <div className="text-4xl font-bold text-comb-900">{state.resources.honey}</div>
+              <div className="text-sm text-comb-800 font-bold">BOTTLES</div>
+              <button
+                onClick={() => actions.sellResources('honey', Math.min(10, state.resources.honey))}
+                disabled={state.resources.honey < 1}
+                className="mt-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-xs font-bold py-2 px-4 rounded border-2 border-comb-900"
+              >
+                SELL 10 (100 💰)
+              </button>
             </div>
           </div>
 
@@ -174,19 +120,32 @@ const InventoryPage = () => {
             <div className="text-center">
               <div className="text-5xl mb-2">🟧</div>
               <h3 className="text-2xl font-minecraft text-comb-900 font-bold mb-2">HONEY BLOCK</h3>
-              <div className="text-4xl font-bold text-comb-900">{totalResources.honeyBlock}</div>
-              <div className="text-sm text-comb-800 font-bold">STACKS</div>
-              <div className="text-xs text-comb-700 mt-2">
-                ({totalResources.honeyBlock * 64} blocks)
-              </div>
+              <div className="text-4xl font-bold text-comb-900">{state.resources.honeyBlock}</div>
+              <div className="text-sm text-comb-800 font-bold">BLOCKS</div>
+              <button
+                onClick={() => actions.sellResources('honeyBlock', Math.min(10, state.resources.honeyBlock))}
+                disabled={state.resources.honeyBlock < 1}
+                className="mt-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-xs font-bold py-2 px-4 rounded border-2 border-comb-900"
+              >
+                SELL 10 (400 💰)
+              </button>
             </div>
           </div>
         </div>
 
         {/* Chest Details */}
-        <h2 className="text-2xl font-minecraft text-comb-900 mb-4">🗃️ STORAGE UNITS</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-minecraft text-comb-900">🗃️ STORAGE UNITS</h2>
+          <button
+            onClick={() => actions.expandStorage()}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg border-2 border-comb-900"
+          >
+            + ADD CHEST (1500 💰)
+          </button>
+        </div>
+
         <div className="space-y-6">
-          {chests.map((chest) => (
+          {state.chests.map((chest) => (
             <div
               key={chest.id}
               className={`chest-card ${getChestStatusColor(chest.status)} rounded-lg p-6 border-4 shadow-xl`}

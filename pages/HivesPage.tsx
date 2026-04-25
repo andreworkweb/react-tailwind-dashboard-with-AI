@@ -1,29 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-
-interface Hive {
-  id: number;
-  name: string;
-  bees: number; // 0-3
-  honeyLevel: number; // 0-5
-  status: 'active' | 'full' | 'empty' | 'warning';
-  location: string;
-}
+import { useGame } from '../context/GameContext';
 
 const HivesPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Mock data for hives
-  const [hives] = useState<Hive[]>([
-    { id: 1, name: 'Hive Alpha', bees: 3, honeyLevel: 5, status: 'full', location: 'X: 120, Z: 45' },
-    { id: 2, name: 'Hive Beta', bees: 2, honeyLevel: 3, status: 'active', location: 'X: 135, Z: 48' },
-    { id: 3, name: 'Hive Gamma', bees: 3, honeyLevel: 4, status: 'active', location: 'X: 142, Z: 52' },
-    { id: 4, name: 'Hive Delta', bees: 1, honeyLevel: 1, status: 'warning', location: 'X: 128, Z: 60' },
-    { id: 5, name: 'Hive Epsilon', bees: 0, honeyLevel: 0, status: 'empty', location: 'X: 150, Z: 55' },
-    { id: 6, name: 'Hive Zeta', bees: 3, honeyLevel: 5, status: 'full', location: 'X: 115, Z: 70' },
-    { id: 7, name: 'Hive Eta', bees: 2, honeyLevel: 2, status: 'active', location: 'X: 160, Z: 65' },
-    { id: 8, name: 'Hive Theta', bees: 3, honeyLevel: 4, status: 'active', location: 'X: 145, Z: 75' },
-  ]);
+  const { state, actions } = useGame();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -77,6 +58,8 @@ const HivesPage = () => {
     }
   };
 
+  const activeHives = state.hives.filter(h => h.status === 'active' || h.status === 'full').length;
+
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-honey-50 to-honey-100 p-8">
       <div className="max-w-7xl mx-auto">
@@ -84,11 +67,21 @@ const HivesPage = () => {
           🏠 HIVES REGISTRY
         </h1>
         <p className="page-title text-center text-comb-700 mb-8 font-bold">
-          Total Hives: {hives.length} | Active: {hives.filter(h => h.status === 'active' || h.status === 'full').length}
+          Total Hives: {state.hives.length} | Active: {activeHives}
         </p>
 
+        {/* Buy New Hive Button */}
+        <div className="mb-6 text-center">
+          <button
+            onClick={() => actions.buyHive()}
+            className="bg-green-500 hover:bg-green-600 text-comb-900 font-bold py-3 px-6 rounded-lg border-4 border-green-700 transition-all transform hover:scale-105 shadow-xl"
+          >
+            🏠 BUY NEW HIVE (2000 💰)
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {hives.map((hive) => (
+          {state.hives.map((hive) => (
             <div
               key={hive.id}
               className={`hive-card ${getStatusColor(hive.status)} rounded-lg p-6 border-4 shadow-xl transform hover:scale-105 transition-transform cursor-pointer`}
@@ -105,36 +98,78 @@ const HivesPage = () => {
               <div className="bg-comb-900/20 rounded-lg p-3 mb-3 border-2 border-comb-900">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-bold text-comb-900">BEES</span>
-                  <span className="text-lg font-bold text-comb-900">{hive.bees}/3</span>
+                  <span className="text-lg font-bold text-comb-900">{hive.bees.length}/{hive.maxBees}</span>
                 </div>
                 <div className="flex gap-1">
-                  {[...Array(3)].map((_, i) => (
+                  {[...Array(hive.maxBees)].map((_, i) => (
                     <div
                       key={i}
                       className={`flex-1 h-2 rounded-full border-2 border-comb-900 ${
-                        i < hive.bees ? 'bg-yellow-400' : 'bg-comb-900/30'
+                        i < hive.bees.length ? 'bg-yellow-400' : 'bg-comb-900/30'
                       }`}
                     />
                   ))}
                 </div>
+                {hive.bees.length < hive.maxBees && (
+                  <button
+                    onClick={() => actions.addBeesToHive(hive.id)}
+                    className="mt-2 w-full bg-yellow-400 hover:bg-yellow-500 text-comb-900 text-xs font-bold py-1 px-2 rounded border-2 border-comb-900"
+                  >
+                    + ADD BEE (300 💰)
+                  </button>
+                )}
               </div>
 
               {/* Honey Level */}
               <div className="bg-comb-900/20 rounded-lg p-3 mb-3 border-2 border-comb-900">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-bold text-comb-900">HONEY</span>
-                  <span className="text-lg font-bold text-comb-900">{hive.honeyLevel}/5</span>
+                  <span className="text-lg font-bold text-comb-900">{Math.floor(hive.honeyLevel)}/5</span>
                 </div>
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
                     <div
                       key={i}
                       className={`flex-1 h-2 rounded-full border-2 border-comb-900 ${
-                        i < hive.honeyLevel ? 'bg-honey-600' : 'bg-comb-900/30'
+                        i < Math.floor(hive.honeyLevel) ? 'bg-honey-600' : 'bg-comb-900/30'
                       }`}
                     />
                   ))}
                 </div>
+                {hive.honeyLevel >= 1 && (
+                  <button
+                    onClick={() => actions.collectHoney(hive.id)}
+                    className="mt-2 w-full bg-honey-500 hover:bg-honey-600 text-comb-900 text-xs font-bold py-1 px-2 rounded border-2 border-comb-900"
+                  >
+                    🍯 COLLECT HONEY
+                  </button>
+                )}
+              </div>
+
+              {/* Honeycomb Level */}
+              <div className="bg-comb-900/20 rounded-lg p-3 mb-3 border-2 border-comb-900">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-comb-900">COMB</span>
+                  <span className="text-lg font-bold text-comb-900">{Math.floor(hive.honeycombLevel)}/5</span>
+                </div>
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`flex-1 h-2 rounded-full border-2 border-comb-900 ${
+                        i < Math.floor(hive.honeycombLevel) ? 'bg-honey-600' : 'bg-comb-900/30'
+                      }`}
+                    />
+                  ))}
+                </div>
+                {hive.honeycombLevel >= 1 && (
+                  <button
+                    onClick={() => actions.collectHoneycomb(hive.id)}
+                    className="mt-2 w-full bg-honey-500 hover:bg-honey-600 text-comb-900 text-xs font-bold py-1 px-2 rounded border-2 border-comb-900"
+                  >
+                    ⬡ COLLECT COMB
+                  </button>
+                )}
               </div>
 
               {/* Status Badge */}
