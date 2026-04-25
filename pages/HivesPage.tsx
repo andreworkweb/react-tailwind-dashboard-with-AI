@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 
 const HivesPage = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.animate-item', {
+        y: 50,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-honey-50 p-8">
-      <h1 className="text-4xl font-minecraft text-comb-900 mb-4">🏠 HIVES REGISTRY</h1>
-      <p className="text-comb-800">Hives management page - Coming soon...</p>
+    <div ref={containerRef} className="min-h-screen bg-honey-50 p-8">
+      <h1 className="text-4xl font-minecraft text-comb-900 mb-4 animate-item">🏠 HIVES REGISTRY</h1>
+      <p className="text-comb-800 animate-item">Hives management page - Coming soon...</p>
     </div>
   );
 };

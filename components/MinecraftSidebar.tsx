@@ -1,7 +1,11 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useRef, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import gsap from 'gsap';
 
 const MinecraftSidebar = () => {
+  const sidebarRef = useRef<HTMLElement>(null);
+  const location = useLocation();
+
   const menuItems = [
     { name: 'Dashboard', path: '/', icon: '📊', emoji: '🐝' },
     { name: 'Hives Registry', path: '/hives', icon: '🏠', emoji: '🏠' },
@@ -10,11 +14,20 @@ const MinecraftSidebar = () => {
     { name: 'Analytics', path: '/analytics', icon: '📈', emoji: '📈' },
   ];
 
+  useEffect(() => {
+    // Animate sidebar on mount
+    gsap.fromTo(
+      sidebarRef.current,
+      { x: -300, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
+    );
+  }, []);
+
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-comb-900/80 backdrop-blur-lg border-r-4 border-honey-500 shadow-2xl z-40">
+    <aside ref={sidebarRef} className="fixed left-0 top-0 h-screen w-64 bg-comb-900/80 backdrop-blur-lg border-r-4 border-honey-500 shadow-2xl z-40">
       <div className="p-6 border-b-2 border-honey-500/30">
         <div className="flex items-center space-x-3">
-          <div className="text-4xl">🐝</div>
+          <div className="text-4xl animate-bounce">🐝</div>
           <div>
             <h2 className="text-xl font-minecraft text-honey-400">BEE FARM</h2>
             <p className="text-xs text-honey-600">Management</p>
@@ -29,16 +42,19 @@ const MinecraftSidebar = () => {
             to={item.path}
             end={item.path === '/'}
             className={({ isActive }) =>
-              `flex items-center space-x-3 px-4 py-3 mb-2 rounded-lg transition-all duration-300 group ${
+              `flex items-center space-x-3 px-4 py-3 mb-2 rounded-lg group relative overflow-hidden ${
                 isActive
                   ? 'bg-gradient-to-r from-honey-500 to-honey-600 shadow-lg border-l-4 border-honey-300'
                   : 'text-honey-200 hover:bg-honey-500/20 hover:text-honey-300'
               }`
             }
+            style={{ transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
           >
             {({ isActive }) => (
               <>
-                <span className="text-2xl">{item.emoji}</span>
+                <span className="text-2xl transform transition-transform duration-200 group-hover:scale-110">
+                  {item.emoji}
+                </span>
                 <span className={`font-bold text-sm ${isActive ? 'text-comb-900' : 'text-honey-200 group-hover:text-honey-300'}`}>
                   {item.name}
                 </span>

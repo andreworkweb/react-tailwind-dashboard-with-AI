@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import HexagonCard from './components/HexagonCard';
 import BeePopulation from './components/BeePopulation';
 import HoneyReservoir from './components/HoneyReservoir';
@@ -6,19 +7,60 @@ import PollinationZone from './components/PollinationZone';
 import HiveMiniMap from './components/HiveMiniMap';
 
 const Dashboard = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Animate hexagons
+      gsap.from('.hexagon-card', {
+        scale: 0,
+        rotation: 180,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'back.out(1.7)',
+      });
+
+      // Animate widgets
+      gsap.from('.widget-card', {
+        y: 100,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        delay: 0.4,
+      });
+
+      // Animate map section
+      gsap.from('.map-section', {
+        x: -50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power3.out',
+        delay: 0.8,
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="p-8">
+    <div ref={containerRef} className="p-8">
         {/* Hexagon Grid - Main Stats */}
         <div className="mb-8">
           <h2 className="text-2xl font-minecraft text-comb-900 mb-6 text-center">⬡ HIVE STATISTICS ⬡</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <HexagonCard
+            <div className="hexagon-card">
+              <HexagonCard
               title="HIVES"
               value="24"
               subtitle="Active"
               status="active"
               icon="🏠"
             />
+            </div>
+            <div className="hexagon-card">
             <HexagonCard
               title="BEES"
               value="247"
@@ -26,6 +68,8 @@ const Dashboard = () => {
               status="active"
               icon="🐝"
             />
+            </div>
+            <div className="hexagon-card">
             <HexagonCard
               title="HONEY"
               value="1.5K"
@@ -33,6 +77,8 @@ const Dashboard = () => {
               status="full"
               icon="🍯"
             />
+            </div>
+            <div className="hexagon-card">
             <HexagonCard
               title="COMBS"
               value="456"
@@ -40,21 +86,30 @@ const Dashboard = () => {
               status="active"
               icon="⬡"
             />
+            </div>
           </div>
         </div>
 
         {/* Main Widgets Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <BeePopulation />
-          <HoneyReservoir />
-          <PollinationZone />
+          <div className="widget-card">
+            <BeePopulation />
+          </div>
+          <div className="widget-card">
+            <HoneyReservoir />
+          </div>
+          <div className="widget-card">
+            <PollinationZone />
+          </div>
         </div>
 
         {/* Map Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <HiveMiniMap />
+          <div className="map-section">
+            <HiveMiniMap />
+          </div>
 
-          <div className="bg-gradient-to-br from-honey-100 to-honey-200 rounded-lg p-6 border-4 border-comb-900 shadow-xl">
+          <div className="map-section bg-gradient-to-br from-honey-100 to-honey-200 rounded-lg p-6 border-4 border-comb-900 shadow-xl">
             <h2 className="text-xl font-minecraft text-comb-900 mb-4 text-center">📊 PRODUCTION STATS</h2>
 
             <div className="space-y-4">
