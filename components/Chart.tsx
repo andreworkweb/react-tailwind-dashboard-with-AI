@@ -13,22 +13,22 @@ const Chart = () => {
   const maxValue = Math.max(...data.map(d => d.value));
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-6">Revenue Overview</h2>
+    <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border-2 border-honey-200 p-6">
+      <h2 className="text-lg font-semibold text-honey-900 mb-6">🍯 Honey Production Overview</h2>
       <div className="flex items-end justify-between h-64 space-x-4">
         {data.map((item, idx) => (
           <div key={idx} className="flex-1 flex flex-col items-center">
-            <div className="w-full bg-gray-200 rounded-t relative" style={{ height: '100%' }}>
+            <div className="w-full bg-honey-100 rounded-t relative" style={{ height: '100%' }}>
               <div
-                className="w-full bg-blue-500 rounded-t absolute bottom-0 transition-all duration-500 hover:bg-blue-600"
+                className="w-full bg-gradient-to-t from-honey-500 to-comb-400 rounded-t absolute bottom-0 transition-all duration-500 hover:from-honey-600 hover:to-comb-500"
                 style={{ height: `${(item.value / maxValue) * 100}%` }}
               >
-                <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700">
-                  {item.value}%
+                <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-honey-900">
+                  {item.value}
                 </span>
               </div>
             </div>
-            <span className="mt-2 text-sm text-gray-600">{item.month}</span>
+            <span className="mt-2 text-sm text-honey-700 font-medium">{item.month}</span>
           </div>
         ))}
       </div>
