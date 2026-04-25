@@ -6,11 +6,11 @@ export const useGameLoop = () => {
   const { state, updateState } = useGame();
 
   useEffect(() => {
-    // Run game loop every second
+    // Run game loop every second, but simulate 60 in-game minutes (1 hour)
     const interval = setInterval(() => {
       updateState(currentState => {
-        // Update game time (1 in-game minute per real second)
-        const newGameTime = currentState.gameTime + 1;
+        // Update game time (60 in-game minutes per real second = 1 in-game hour per second)
+        const newGameTime = currentState.gameTime + 60;
 
         // Update weather and time of day
         const newWeather = updateWeather(currentState.weather, newGameTime);
@@ -18,16 +18,16 @@ export const useGameLoop = () => {
 
         // Update all hives
         const updatedHives = currentState.hives.map(hive => {
-          // Update bees
-          const updatedBees = updateBees(hive.bees, 1);
+          // Update bees (60x faster)
+          const updatedBees = updateBees(hive.bees, 60);
 
-          // Produce honey and honeycomb
+          // Produce honey and honeycomb (60x faster)
           const { honeyLevel, honeycombLevel } = produceHoney(
             hive,
             currentState.weather,
             currentState.timeOfDay,
             currentState.upgrades.productionSpeed.effect,
-            1
+            60
           );
 
           const updatedHive = {
@@ -60,12 +60,12 @@ export const useGameLoop = () => {
           });
         }
 
-        // Update dispensers (consume items over time)
+        // Update dispensers (consume items over time, 60x faster)
         const updatedDispensers = currentState.dispensers.map(dispenser => {
           if (!dispenser.enabled) return dispenser;
 
-          // Consume 1 item every 30 seconds
-          const consumeRate = 1 / 30;
+          // Consume 1 item every 30 seconds, now 60x faster
+          const consumeRate = (1 / 30) * 60;
           const newCurrent = Math.max(0, dispenser.current - consumeRate);
 
           let status: typeof dispenser.status = 'normal';
@@ -81,7 +81,7 @@ export const useGameLoop = () => {
           };
         });
 
-        // Update production history (every in-game hour)
+        // Update production history (every in-game hour, which is now every second)
         let updatedHistory = [...currentState.productionHistory];
         if (newGameTime % 60 === 0) {
           const hour = Math.floor((newGameTime / 60) % 24);

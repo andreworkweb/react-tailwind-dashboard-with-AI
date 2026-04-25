@@ -1,7 +1,18 @@
 import React from 'react';
+import { useGame } from '../context/GameContext';
 
 const HoneyReservoir = () => {
-  const honeyLevel = 75; // percentage filled
+  const { state } = useGame();
+
+  // Calculate total honey in all hives
+  const totalHoneyInHives = state.hives.reduce((sum, hive) => sum + hive.honeyLevel, 0);
+  const maxHoneyCapacity = state.hives.length * 5; // Each hive can hold 5 honey
+  const honeyLevel = maxHoneyCapacity > 0 ? Math.round((totalHoneyInHives / maxHoneyCapacity) * 100) : 0;
+
+  // Calculate production rates (honey being produced right now)
+  const activeHives = state.hives.filter(h => h.bees.length > 0).length;
+  const honeyPerHour = Math.round(activeHives * 2); // Rough estimate
+  const honeycombPerHour = Math.round(activeHives * 1.5); // Rough estimate
 
   return (
     <div className="bg-gradient-to-br from-honey-100 to-honey-200 rounded-lg p-6 border-4 border-comb-900 shadow-xl">
@@ -30,11 +41,11 @@ const HoneyReservoir = () => {
       <div className="mt-4 grid grid-cols-2 gap-4">
         <div className="bg-comb-900/20 rounded-lg p-3 border-2 border-comb-900">
           <p className="text-xs text-comb-900 font-bold">HONEYCOMB</p>
-          <p className="text-2xl font-bold text-comb-900">24/hr</p>
+          <p className="text-2xl font-bold text-comb-900">{honeycombPerHour}/hr</p>
         </div>
         <div className="bg-comb-900/20 rounded-lg p-3 border-2 border-comb-900">
           <p className="text-xs text-comb-900 font-bold">BOTTLES</p>
-          <p className="text-2xl font-bold text-comb-900">18/hr</p>
+          <p className="text-2xl font-bold text-comb-900">{honeyPerHour}/hr</p>
         </div>
       </div>
     </div>

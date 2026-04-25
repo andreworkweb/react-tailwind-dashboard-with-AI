@@ -1,10 +1,20 @@
 import React from 'react';
+import { useGame } from '../context/GameContext';
 
 const BeePopulation = () => {
-  const totalBees = 247;
-  const inHives = 189;
-  const collecting = 45;
-  const homeless = 13;
+  const { state } = useGame();
+
+  // Calculate bee statistics from real game state
+  const totalBees = state.hives.reduce((sum, hive) => sum + hive.bees.length, 0);
+  const inHives = state.hives.reduce((sum, hive) =>
+    sum + hive.bees.filter(bee => bee.state === 'in_hive').length, 0
+  );
+  const collecting = state.hives.reduce((sum, hive) =>
+    sum + hive.bees.filter(bee => bee.state === 'collecting').length, 0
+  );
+  const returning = state.hives.reduce((sum, hive) =>
+    sum + hive.bees.filter(bee => bee.state === 'returning').length, 0
+  );
 
   return (
     <div className="bg-gradient-to-br from-honey-100 to-honey-200 rounded-lg p-6 border-4 border-comb-900 shadow-xl">
@@ -32,12 +42,12 @@ const BeePopulation = () => {
           <span className="text-2xl font-bold text-comb-900">{collecting}</span>
         </div>
 
-        <div className="bg-red-400 rounded-lg p-3 border-2 border-comb-900 flex items-center justify-between">
+        <div className="bg-blue-400 rounded-lg p-3 border-2 border-comb-900 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">❌</span>
-            <span className="text-sm font-bold text-comb-900">HOMELESS</span>
+            <span className="text-2xl">🔙</span>
+            <span className="text-sm font-bold text-comb-900">RETURNING</span>
           </div>
-          <span className="text-2xl font-bold text-comb-900">{homeless}</span>
+          <span className="text-2xl font-bold text-comb-900">{returning}</span>
         </div>
       </div>
     </div>
