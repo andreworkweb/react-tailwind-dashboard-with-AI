@@ -1,4 +1,4 @@
-#This project was built with the help of AI 
+#This project was fully built by AI 🤖⚡
 
 # Dashboard UI
 
