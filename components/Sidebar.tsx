@@ -13,8 +13,8 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className={`${collapsed ? 'w-20' : 'w-64'} bg-gray-900 min-h-screen text-white transition-all duration-300`}>
-      <div className="p-6 flex items-center justify-between">
+    <div className={`${collapsed ? 'w-20' : 'w-64'} bg-gray-900 h-screen text-white transition-all duration-300 flex flex-col overflow-hidden fixed left-0 top-0`}>
+      <div className="p-6 flex items-center justify-between flex-shrink-0">
         {!collapsed && <h1 className="text-2xl font-bold">Admin Panel</h1>}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -25,7 +25,7 @@ const Sidebar = () => {
           </svg>
         </button>
       </div>
-      <nav className="mt-6">
+      <nav className="mt-6 flex-1 overflow-y-auto">
         {menuItems.map((item, idx) => (
           <a
             key={idx}
