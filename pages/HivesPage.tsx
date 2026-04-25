@@ -66,119 +66,142 @@ const HivesPage = () => {
         <h1 className="page-title text-4xl font-minecraft text-comb-900 mb-2 text-center">
           🏠 HIVES REGISTRY
         </h1>
-        <p className="page-title text-center text-comb-700 mb-8 font-bold">
+        <p className="page-title text-center text-comb-700 mb-4 font-bold">
           Total Hives: {state.hives.length} | Active: {activeHives}
         </p>
 
         {/* Buy New Hive Button */}
-        <div className="mb-6 text-center">
+        <div className="mb-8 flex justify-center">
           <button
             onClick={() => actions.buyHive()}
-            className="bg-green-500 hover:bg-green-600 text-comb-900 font-bold py-3 px-6 rounded-lg border-4 border-green-700 transition-all transform hover:scale-105 shadow-xl"
+            disabled={state.resources.money < 2000}
+            className="bg-gradient-to-br from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-comb-900 font-minecraft font-bold py-4 px-8 rounded-lg border-4 border-comb-900 transition-all transform hover:scale-105 shadow-xl text-lg"
           >
-            🏠 BUY NEW HIVE (2000 💰)
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🏠</span>
+              <div className="text-left">
+                <div className="text-xl">BUY NEW HIVE</div>
+                <div className="text-sm opacity-80">Cost: 2000 💰</div>
+              </div>
+            </div>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {state.hives.map((hive) => (
             <div
               key={hive.id}
-              className={`hive-card ${getStatusColor(hive.status)} rounded-lg p-6 border-4 shadow-xl transform hover:scale-105 transition-transform cursor-pointer`}
+              className={`hive-card ${getStatusColor(hive.status)} rounded-lg p-6 border-4 shadow-xl`}
             >
               {/* Hive Header */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-minecraft text-comb-900 font-bold">
-                  {hive.name}
-                </h3>
-                <span className="text-3xl">🏠</span>
+              <div className="bg-comb-900/30 rounded-lg p-4 mb-4 border-2 border-comb-900">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-2xl font-minecraft text-comb-900 font-bold">
+                    {hive.name}
+                  </h3>
+                  <span className="text-4xl">🏠</span>
+                </div>
+                <div className="text-center bg-comb-900 text-white py-2 rounded-lg font-bold text-sm">
+                  {getStatusText(hive.status)}
+                </div>
               </div>
 
-              {/* Bees Count */}
-              <div className="bg-comb-900/20 rounded-lg p-3 mb-3 border-2 border-comb-900">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-comb-900">BEES</span>
-                  <span className="text-lg font-bold text-comb-900">{hive.bees.length}/{hive.maxBees}</span>
+              {/* Bees Section */}
+              <div className="bg-white/50 rounded-lg p-4 mb-3 border-2 border-comb-900">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🐝</span>
+                    <span className="text-lg font-bold text-comb-900">BEES</span>
+                  </div>
+                  <span className="text-2xl font-bold text-comb-900">{hive.bees.length}/{hive.maxBees}</span>
                 </div>
-                <div className="flex gap-1">
+
+                {/* Bee slots visual */}
+                <div className="flex gap-2 mb-3">
                   {[...Array(hive.maxBees)].map((_, i) => (
                     <div
                       key={i}
-                      className={`flex-1 h-2 rounded-full border-2 border-comb-900 ${
-                        i < hive.bees.length ? 'bg-yellow-400' : 'bg-comb-900/30'
+                      className={`flex-1 h-8 rounded border-2 border-comb-900 flex items-center justify-center text-xl ${
+                        i < hive.bees.length ? 'bg-yellow-400' : 'bg-gray-300'
                       }`}
-                    />
+                    >
+                      {i < hive.bees.length ? '🐝' : ''}
+                    </div>
                   ))}
                 </div>
+
                 {hive.bees.length < hive.maxBees && (
                   <button
                     onClick={() => actions.addBeesToHive(hive.id)}
-                    className="mt-2 w-full bg-yellow-400 hover:bg-yellow-500 text-comb-900 text-xs font-bold py-1 px-2 rounded border-2 border-comb-900"
+                    disabled={state.resources.money < 300}
+                    className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-comb-900 font-bold py-2 px-4 rounded-lg border-2 border-comb-900 transition-all"
                   >
                     + ADD BEE (300 💰)
                   </button>
                 )}
               </div>
 
-              {/* Honey Level */}
-              <div className="bg-comb-900/20 rounded-lg p-3 mb-3 border-2 border-comb-900">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-comb-900">HONEY</span>
-                  <span className="text-lg font-bold text-comb-900">{Math.floor(hive.honeyLevel)}/5</span>
-                </div>
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`flex-1 h-2 rounded-full border-2 border-comb-900 ${
-                        i < Math.floor(hive.honeyLevel) ? 'bg-honey-600' : 'bg-comb-900/30'
-                      }`}
-                    />
-                  ))}
-                </div>
-                {hive.honeyLevel >= 1 && (
-                  <button
-                    onClick={() => actions.collectHoney(hive.id)}
-                    className="mt-2 w-full bg-honey-500 hover:bg-honey-600 text-comb-900 text-xs font-bold py-1 px-2 rounded border-2 border-comb-900"
-                  >
-                    🍯 COLLECT HONEY
-                  </button>
-                )}
-              </div>
+              {/* Resources Section */}
+              <div className="space-y-3">
+                {/* Honey */}
+                <div className="bg-white/50 rounded-lg p-3 border-2 border-comb-900">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🍯</span>
+                      <span className="text-sm font-bold text-comb-900">HONEY</span>
+                    </div>
+                    <span className="text-lg font-bold text-comb-900">{Math.floor(hive.honeyLevel)}/5</span>
+                  </div>
 
-              {/* Honeycomb Level */}
-              <div className="bg-comb-900/20 rounded-lg p-3 mb-3 border-2 border-comb-900">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-comb-900">COMB</span>
-                  <span className="text-lg font-bold text-comb-900">{Math.floor(hive.honeycombLevel)}/5</span>
-                </div>
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
+                  {/* Progress bar */}
+                  <div className="w-full bg-gray-300 rounded-full h-3 border-2 border-comb-900 mb-2">
                     <div
-                      key={i}
-                      className={`flex-1 h-2 rounded-full border-2 border-comb-900 ${
-                        i < Math.floor(hive.honeycombLevel) ? 'bg-honey-600' : 'bg-comb-900/30'
-                      }`}
+                      className="bg-honey-600 h-full rounded-full transition-all"
+                      style={{ width: `${(hive.honeyLevel / 5) * 100}%` }}
                     />
-                  ))}
-                </div>
-                {hive.honeycombLevel >= 1 && (
-                  <button
-                    onClick={() => actions.collectHoneycomb(hive.id)}
-                    className="mt-2 w-full bg-honey-500 hover:bg-honey-600 text-comb-900 text-xs font-bold py-1 px-2 rounded border-2 border-comb-900"
-                  >
-                    ⬡ COLLECT COMB
-                  </button>
-                )}
-              </div>
+                  </div>
 
-              {/* Status Badge */}
-              <div className="bg-comb-900 text-white text-center py-2 rounded-lg mb-3 font-bold text-xs">
-                {getStatusText(hive.status)}
+                  {hive.honeyLevel >= 1 && (
+                    <button
+                      onClick={() => actions.collectHoney(hive.id)}
+                      className="w-full bg-honey-500 hover:bg-honey-600 text-comb-900 font-bold py-2 px-4 rounded-lg border-2 border-comb-900 transition-all"
+                    >
+                      🍯 COLLECT ({Math.floor(hive.honeyLevel)} bottles)
+                    </button>
+                  )}
+                </div>
+
+                {/* Honeycomb */}
+                <div className="bg-white/50 rounded-lg p-3 border-2 border-comb-900">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">⬡</span>
+                      <span className="text-sm font-bold text-comb-900">HONEYCOMB</span>
+                    </div>
+                    <span className="text-lg font-bold text-comb-900">{Math.floor(hive.honeycombLevel)}/5</span>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="w-full bg-gray-300 rounded-full h-3 border-2 border-comb-900 mb-2">
+                    <div
+                      className="bg-honey-600 h-full rounded-full transition-all"
+                      style={{ width: `${(hive.honeycombLevel / 5) * 100}%` }}
+                    />
+                  </div>
+
+                  {hive.honeycombLevel >= 1 && (
+                    <button
+                      onClick={() => actions.collectHoneycomb(hive.id)}
+                      className="w-full bg-honey-500 hover:bg-honey-600 text-comb-900 font-bold py-2 px-4 rounded-lg border-2 border-comb-900 transition-all"
+                    >
+                      ⬡ COLLECT ({Math.floor(hive.honeycombLevel)} items)
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Location */}
-              <div className="text-center text-xs text-comb-900 font-bold opacity-70">
+              <div className="mt-3 text-center text-xs text-comb-900 font-bold opacity-70 bg-comb-900/20 py-2 rounded">
                 📍 {hive.location}
               </div>
             </div>
