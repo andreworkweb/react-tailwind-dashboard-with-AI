@@ -1,5 +1,4 @@
 import React from 'react';
-import MinecraftHeader from './components/MinecraftHeader';
 import HexagonCard from './components/HexagonCard';
 import BeePopulation from './components/BeePopulation';
 import HoneyReservoir from './components/HoneyReservoir';
@@ -8,10 +7,7 @@ import HiveMiniMap from './components/HiveMiniMap';
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-honey-50">
-      <MinecraftHeader />
-
-      <div className="p-8">
+    <div className="p-8">
         {/* Hexagon Grid - Main Stats */}
         <div className="mb-8">
           <h2 className="text-2xl font-minecraft text-comb-900 mb-6 text-center">⬡ HIVE STATISTICS ⬡</h2>
@@ -104,7 +100,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
