@@ -20,7 +20,7 @@ const App = () => {
     <GameProvider>
       <GameLoop />
       <Router>
-        <div className="min-h-screen bg-honey-50">
+        <div className="min-h-screen bg-honey-50 bg-cover bg-center bg-fixed" style={{ backgroundImage: 'url(/bg-flower-photo.webp)' }}>
           <MinecraftSidebar />
           <div className="ml-64">
             <MinecraftHeader />
